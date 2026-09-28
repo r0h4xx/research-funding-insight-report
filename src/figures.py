@@ -11,7 +11,7 @@ NAVY='#1F3A5F'; GREY='#A6ADB5'; TEAL='#2A8C82'; RED='#B5473A'; LIGHT='#D9DEE4'
 R=json.load(open('results.json'))
 def save(f,n): f.savefig(f'figures/{n}.png',bbox_inches='tight',dpi=220); plt.close(f)
 
-# ---- Pipeline diagram (page 2) ----
+# pipelien
 f,ax=plt.subplots(figsize=(7.2,1.35)); ax.axis('off'); ax.set_xlim(-1.5,101); ax.set_ylim(0,20)
 boxes=[(0,'Sources','3 official Dept of\nEducation files'),(20.5,'Extract','Pivot caches and\nRBG tables to CSV'),
  (41,'Clean & link','Name crosswalk,\nmerger, time lag'),(61.5,'Analyse','Shares, ratios,\nlog-log regression'),(82,'Communicate','Report charts and\nTableau dashboard')]
@@ -22,7 +22,7 @@ for x,t,s in boxes:
 for x in [17.9,38.4,58.9,79.4]: ax.annotate('',xy=(x+2.4,9.5),xytext=(x,9.5),arrowprops=dict(arrowstyle='->',color=NAVY,lw=1))
 save(f,'pipeline')
 
-# ---- Context (page 4) ----
+
 f,(a1,a2)=plt.subplots(1,2,figsize=(7.4,2.7),gridspec_kw={'width_ratios':[1.05,1]})
 yrs=list(range(2017,2027)); rtp=[R['rbg_rtp'][str(y)]/1e9 for y in yrs]; rsp=[R['rbg_rsp'][str(y)]/1e9 for y in yrs]
 a1.bar(yrs,rtp,color=NAVY,width=0.7,label='Research Training Program (RTP)'); a1.bar(yrs,rsp,bottom=rtp,color=GREY,width=0.7,label='Research Support Program (RSP)')
@@ -38,7 +38,7 @@ a2.set_ylim(0,70); a2.text(2017,-17,'2026 excluded: the Adelaide/UniSA merger re
 a2.set_xticks(y9); a2.set_xticklabels([str(y)[2:] if y!=2017 else '2017' for y in y9],fontsize=8.5)
 f.tight_layout(w_pad=2.5); save(f,'context')
 
-# ---- Finding 1 ----
+# finidng 1
 d=pd.read_csv('output/model_institutions.csv',index_col=0)
 short={'The University of Melbourne':'Melbourne','Monash University':'Monash','The University of Sydney':'Sydney','University of New South Wales':'UNSW',
  'The University of Queensland':'Queensland','The Australian National University':'ANU','The University of Western Australia':'UWA','The University of Adelaide':'Adelaide',
@@ -71,7 +71,7 @@ b2.legend(frameon=False,fontsize=8,loc='upper left'); b2.set_title('RTP funding 
 b2.text(0.98,0.04,f"Dashed lines: fitted model. At the same number of\ncompletions, Go8 line sits {m['go8_mult']:.2f}x higher.",transform=b2.transAxes,ha='right',fontsize=7.8,color='#444')
 f.tight_layout(w_pad=1.5); save(f,'finding1')
 
-# ---- Finding 2 ----
+# finding 2
 F=R['f2']; yy=[str(y) for y in range(2020,2025)]; x=list(range(2020,2025))
 dc=[F['hdr_comm_dom'][y] for y in yy]; oc=[F['hdr_comm_os'][y] for y in yy]
 f,(c1,c2)=plt.subplots(1,2,figsize=(7.4,3.7),gridspec_kw={'width_ratios':[1,1.15]})
