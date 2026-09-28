@@ -11,7 +11,7 @@ r=pd.read_excel(UP+'Research_block_grants_time_series_2021-2026.xlsx',sheet_name
 r['HEP Name']=r['HEP Name'].str.strip()
 t3=pd.read_excel(UP+'Research_block_grants_time_series_2021-2026.xlsx',sheet_name='Table 3',header=2)
 R={}
-# ---------- audit ----------
+
 R['audit']=dict(rbg_rows=len(r),rbg_years=[int(r.Year.min()),int(r.Year.max())],rbg_dups=int(r.duplicated(['HEP Code','Year','Program']).sum()),
   rbg_na=int(r.isna().sum().sum()),comp_rows=len(c),enr_rows=len(e),comp_na=int(c.isna().sum().sum()),enr_na=int(e.isna().sum().sum()),
   enr_neg_cells=int((e.Enrolment_Count<0).sum()),
@@ -20,13 +20,13 @@ R['audit']=dict(rbg_rows=len(r),rbg_years=[int(r.Year.min()),int(r.Year.max())],
   add_rsp_2021=float(t3['Additional RSP'].sum()))
 coh=r[r.Year==2025].drop_duplicates('HEP Name').set_index('HEP Name').Cohort
 rb=r[r.Program.isin(['RTP','RSP'])]
-# ---------- sector context ----------
+
 tot=rb.pivot_table(index='Year',columns='Program',values='Amount',aggfunc='sum'); tot['Total']=tot.RTP+tot.RSP
 R['rbg_total']={int(y):float(v) for y,v in tot.Total.items()}
 R['rbg_rtp']={int(y):float(v) for y,v in tot.RTP.items()}; R['rbg_rsp']={int(y):float(v) for y,v in tot.RSP.items()}
 cs=rb[rb.Year.between(2017,2025)].groupby(['Year','Cohort']).Amount.sum().unstack(); cs=cs.div(cs.sum(axis=1),axis=0)*100
 R['cohort_share']={k:{int(y):round(v,2) for y,v in cs[k].items()} for k in cs}
-# ---------- Finding 1: funding vs HDR completions ----------
+# finding 1
 hc=c[c.Detailed_Course_Level=='Postgraduate research']; he=e[e.Detailed_Course_Level=='Postgraduate research']
 fund=rb[rb.Year==2025].groupby('HEP Name').Amount.sum(); rtp=rb[(rb.Year==2025)&(rb.Program=='RTP')].set_index('HEP Name').Amount
 hdrc=hc[hc.Year.isin([2022,2023])].groupby(['Inst','Year']).Completions.sum().unstack().mean(axis=1)
@@ -59,7 +59,7 @@ h2=hc[hc.Year.isin([2022,2023])].copy(); h2['coh']=h2.Inst.map(coh)
 f=h2.groupby(['coh','Broad_Field_of_Education_Primary']).Completions.sum().unstack().fillna(0); f=f.div(f.sum(axis=1),axis=0)*100
 R['f1_sci_health']=(f['Natural and Physical Sciences']+f['Health']).round(1).to_dict()
 d.to_csv('output/model_institutions.csv')
-# ---------- Finding 2: HDR pipeline ----------
+# finding 2
 com=e[e.Commencing=='Commencing']
 hcom=com[com.Detailed_Course_Level=='Postgraduate research'].groupby(['Citizenship','Year']).Enrolment_Count.sum().unstack()
 alld=com[com.Citizenship=='Domestic'].groupby('Year').Enrolment_Count.sum()
@@ -75,7 +75,7 @@ u=hh.groupby(['Inst','Year']).Enrolment_Count.sum().unstack(); u=u[u.index.isin(
 R['f2_unis']=dict(n=len(u),declined=int((u[2024]<u[2020]).sum()))
 fl=hh.groupby(['Broad_Field_of_Education_Primary','Year']).Enrolment_Count.sum().unstack()
 R['f2_field']={i:dict(y20=fl.loc[i,2020],y24=fl.loc[i,2024]) for i in fl.index if i in fl.index and not np.isnan(fl.loc[i,2020])}
-# ---------- Tableau-ready panel ----------
+# tableau
 yrs=range(2020,2025)
 def piv(df_,val,filt,col):
     x=df_[filt].groupby(['Inst','Year',col])[val].sum().unstack(col); return x
